@@ -18,7 +18,13 @@ tasks:
     cmds:
       - go generate ./...
       - CGO_ENABLED=0 go build -o template-website cmd/*.go
-    # silent: true
+  
+  run:
+    desc: "run webserver"
+    cmds:
+      - go generate ./...
+      - echo "http://localhost:3333"
+      - go run cmd/*.go
 
   # tests:
   #   desc: "Run tests"
