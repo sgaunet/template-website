@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/sgaunet/template-website/internal/webserver"
+	"github.com/sgaunet/template-website/pkg/config"
 )
 
 //go:generate templ generate
@@ -16,7 +18,37 @@ import (
 // otherwise, you can use fiber or echo
 // for api, you can use fiber or echo
 
+var version string
+
+func printVersion() {
+	fmt.Printf("%s\n", version)
+}
+
 func main() {
+	var (
+		err         error
+		cfgFile     string
+		versionFlag bool
+	)
+	flag.BoolVar(&versionFlag, "version", false, "Print version and exit")
+	flag.StringVar(&cfgFile, "config", "", "config file")
+	flag.Parse()
+
+	if versionFlag {
+		printVersion()
+		os.Exit(0)
+	}
+
+	cfg, err := config.LoadConfigFromFileOrEnvVar(cfgFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading YAML file: %s\n", err)
+		os.Exit(1)
+	}
+	if !cfg.IsValid() {
+		fmt.Fprintf(os.Stderr, "Invalid configuration\n")
+		os.Exit(1)
+	}
+
 	w := webserver.NewWebserver(nil, 8080)
 
 	// handle graceful shutdown
@@ -31,7 +63,7 @@ func main() {
 			os.Exit(1)
 		}
 	}()
-	err := w.Run()
+	err = w.Run()
 	if err != nil {
 		if err == http.ErrServerClosed {
 			os.Exit(0)
