@@ -1,14 +1,13 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/sgaunet/template-website/internal/webserver"
 )
 
 //go:generate templ generate
@@ -17,36 +16,27 @@ import (
 // otherwise, you can use fiber or echo
 // for api, you can use fiber or echo
 
-type Msg struct {
-	Name    string `json:"name"`
-	Message string `json:"message"`
-}
-
 func main() {
-	r := chi.NewRouter()
-	// r.Use(middleware.RequestID)
-	r.Use(middleware.Logger)
-	// r.Use(middleware.Recoverer)
+	w := webserver.NewWebserver(nil, 8080)
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		// w.Write([]byte("hello world"))
-		err := Hello("world").Render(context.Background(), w)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
-	r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
-		// w.Write([]byte("hello world"))
-		// Hello("world").Render(context.Background(), w)
-		w.Header().Set("Content-Type", "application/json")
-		err := json.NewEncoder(w).Encode(Msg{Name: "test", Message: "test"})
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
+	// handle graceful shutdown
+	sigs := make(chan os.Signal, 5)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
-	err := http.ListenAndServe(":3333", r)
+	go func() {
+		<-sigs
+		err := w.Shutdown()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(1)
+		}
+	}()
+	err := w.Run()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
+		if err == http.ErrServerClosed {
+			os.Exit(0)
+		}
+		fmt.Fprintf(os.Stderr, "hgf %v\n", err)
+		os.Exit(1)
 	}
 }
