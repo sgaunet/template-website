@@ -1,3 +1,8 @@
 *templ.go
 template-website
 dist
+internal/database/db.go
+internal/database/models.go
+internal/database/queries.sql.go
+internal/database/querier.go
+/webserver
