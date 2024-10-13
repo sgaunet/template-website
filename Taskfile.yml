@@ -19,6 +19,11 @@ tasks:
       - go generate ./...
       - CGO_ENABLED=0 go build -o template-website cmd/*.go
   
+  lint:
+    desc: "Run linter"
+    cmds:
+      - golangci-lint run
+
   run:
     desc: "run webserver"
     cmds:

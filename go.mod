@@ -1,6 +1,6 @@
 module github.com/sgaunet/template-website
 
-go 1.21.2
+go 1.23.0
 
 require (
 	github.com/a-h/templ v0.2.408

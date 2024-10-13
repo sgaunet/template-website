@@ -9,9 +9,12 @@ import (
 
 //go:generate templ generate
 
+// FsBootstrap is an embed.FS that contains the bootstrap files
+//
 //go:embed bootstrap-5.1.3-dist/*
 var FsBootstrap embed.FS
 
+// BootStrapHandler is a function that returns a http.HandlerFunc
 func BootStrapHandler(subPathStripPrefix string) http.HandlerFunc {
 	bootstrapFS, err := fs.Sub(FsBootstrap, "bootstrap-5.1.3-dist")
 	if err != nil {

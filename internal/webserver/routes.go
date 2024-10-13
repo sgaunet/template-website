@@ -1,7 +1,6 @@
 package webserver
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 
@@ -10,7 +9,7 @@ import (
 
 func (w *Webserver) initRoutes() {
 	w.router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		err := views.Hello("world").Render(context.Background(), w)
+		err := views.Hello("world").Render(r.Context(), w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}

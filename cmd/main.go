@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"net/http"
@@ -19,6 +20,8 @@ import (
 // for api, you can use fiber or echo
 
 var version string
+var defaultPort = 8080
+var defaultSizeSignalChannel = 5
 
 func printVersion() {
 	fmt.Printf("%s\n", version)
@@ -49,10 +52,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	w := webserver.NewWebserver(nil, 8080)
+	w := webserver.NewWebserver(nil, defaultPort)
 
 	// handle graceful shutdown
-	sigs := make(chan os.Signal, 5)
+	sigs := make(chan os.Signal, defaultSizeSignalChannel)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
@@ -65,7 +68,7 @@ func main() {
 	}()
 	err = w.Run()
 	if err != nil {
-		if err == http.ErrServerClosed {
+		if errors.Is(err, http.ErrServerClosed) {
 			os.Exit(0)
 		}
 		fmt.Fprintf(os.Stderr, "hgf %v\n", err)

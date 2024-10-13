@@ -7,12 +7,15 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Config is a struct that contains the configuration
 type Config struct {
-	DbDSN string `mapstructure:"dbdsn"`
+	DBDSN string `mapstructure:"dbdsn"`
 	// RedisDSN        string `mapstructure:"redisdsn"`
 	// RedisStream     string `mapstructure:"redisstream"`
 }
 
+// LoadConfigFromFileOrEnvVar is a function that loads the configuration from a file
+// or environment variable
 func LoadConfigFromFileOrEnvVar(cfgFilePath string) (*Config, error) {
 	var C Config
 	viper.SetConfigFile(cfgFilePath)
@@ -29,15 +32,16 @@ func LoadConfigFromFileOrEnvVar(cfgFilePath string) (*Config, error) {
 	}
 	err = viper.Unmarshal(&C)
 	if err != nil {
-		return &C, fmt.Errorf("unable to decode into struct, %v", err)
+		return &C, fmt.Errorf("unable to decode into struct: %w", err)
 	}
 	return &C, nil
 }
 
+// IsValid is a method that checks if the configuration is valid
 func (c *Config) IsValid() bool {
-	if c.DbDSN == "" {
+	if c.DBDSN == "" {
 		return false
 	}
-	_, err := dsn.New(c.DbDSN)
+	_, err := dsn.New(c.DBDSN)
 	return err == nil
 }
