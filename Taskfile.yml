@@ -13,7 +13,7 @@ tasks:
     cmds:
       - task -a
 
-  binary:
+  build:
     desc: "Build binary"
     cmds:
       - go generate ./...
